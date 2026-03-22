@@ -114,7 +114,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private func startApp() {
         service.initialLoad()
 
-        refreshTimer = Timer.scheduledTimer(withTimeInterval: 300, repeats: true) { [weak self] _ in
+        refreshTimer = Timer.scheduledTimer(withTimeInterval: 120, repeats: true) { [weak self] _ in
             self?.service.refresh()
         }
     }

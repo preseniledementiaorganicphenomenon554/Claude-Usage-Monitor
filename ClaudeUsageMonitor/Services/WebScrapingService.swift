@@ -220,7 +220,7 @@ class WebScrapingService: NSObject, ObservableObject {
     // MARK: - DOM extraction (fallback)
 
     private func runDOMExtraction() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) { [weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { [weak self] in
             self?.scrapeWebView.evaluateJavaScript(kDOMExtractionJS) { result, _ in
                 guard let self,
                       let s = result as? String,
