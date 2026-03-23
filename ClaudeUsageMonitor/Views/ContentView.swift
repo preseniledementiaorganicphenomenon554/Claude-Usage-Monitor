@@ -35,7 +35,7 @@ struct ContentView: View {
 
             Spacer()
 
-            if let data = service.usageData {
+            if let data = service.usageData, data.planType.lowercased() != "unknown" {
                 planBadge(data.planType)
             }
         }
