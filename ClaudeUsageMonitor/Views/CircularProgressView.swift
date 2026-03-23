@@ -10,6 +10,8 @@ struct CircularProgressView: View {
 
     // The gradient always spans 0 → 1 so the visible segment colour
     // naturally transitions green → yellow → red as progress climbs.
+    // startAngle: 0° (not -90°) because the Circle also has .rotationEffect(-90°)
+    // which would shift the gradient by another 90° — the two cancel out correctly.
     private let trackGradient = AngularGradient(
         stops: [
             .init(color: .green,  location: 0.0),
@@ -19,8 +21,8 @@ struct CircularProgressView: View {
             .init(color: .red,    location: 1.0),
         ],
         center: .center,
-        startAngle: .degrees(-90),
-        endAngle:   .degrees(270)
+        startAngle: .degrees(0),
+        endAngle:   .degrees(360)
     )
 
     var body: some View {
