@@ -80,7 +80,7 @@ struct ContentView: View {
             } else {
                 progressSection
                 if let data = service.usageData {
-                    resetRow(data)
+                    if data.resetDate != nil { resetRow(data) }
                     statsRow(data)
                 }
             }
