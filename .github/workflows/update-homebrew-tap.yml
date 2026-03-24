@@ -2,9 +2,7 @@ name: Update Homebrew Tap
 
 # Runs automatically after the "Build & Release" workflow finishes
 on:
-  workflow_run:
-    workflows: ["Build & Release"]
-    types: [completed]
+  workflow_dispatch:  # manual only — requires TAP_GITHUB_TOKEN secret to be set first
 
 jobs:
   update-tap:
@@ -34,6 +32,8 @@ jobs:
 
       - name: Checkout tap repo
         uses: actions/checkout@v4
+        env:
+          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
         with:
           repository: theDanButuc/homebrew-tap
           token: ${{ secrets.TAP_GITHUB_TOKEN }}
