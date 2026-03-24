@@ -96,7 +96,9 @@ struct ContentView: View {
                 }
                 progressSection
                 if let data = service.usageData {
-                    if data.resetDate != nil { resetRow(data) }
+                    TimelineView(.periodic(from: .now, by: 60)) { _ in
+                        resetRow(data)
+                    }
                     statsRow(data)
                 }
             }

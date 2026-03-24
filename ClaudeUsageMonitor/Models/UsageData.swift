@@ -27,14 +27,17 @@ struct UsageData {
     var messagesRemaining: Int { max(0, primaryLimit - primaryUsed) }
 
     var timeUntilReset: String {
-        guard let resetDate else { return "Unknown" }
+        guard let resetDate else { return "—" }
         let secs = resetDate.timeIntervalSince(Date())
         guard secs > 0 else { return "Soon" }
-        let h = Int(secs / 3600)
-        let m = Int(secs.truncatingRemainder(dividingBy: 3600) / 60)
-        if h > 24 { return "\(h/24)d \(h%24)h" }
-        if h > 0  { return "\(h)h \(m)m" }
-        return "\(m)m"
+        let totalMins = Int(secs / 60)
+        let h = totalMins / 60
+        let m = totalMins % 60
+        let days = h / 24
+        if days > 0  { return "\(days)d \(h % 24)h" }
+        if h > 0     { return "\(h)h \(m)m" }
+        if m > 0     { return "\(m)m" }
+        return "< 1m"
     }
 
     var lastUpdatedFormatted: String {

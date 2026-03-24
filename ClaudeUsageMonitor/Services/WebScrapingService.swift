@@ -71,8 +71,21 @@ private let kDOMExtractionJS = """
             r.needsLogin = true; return JSON.stringify(r);
         }
 
+        // Gather all visible text from every element (React may not populate body.innerText)
         var body = document.body ? document.body.innerText : '';
-        r.rawText = body.substring(0, 3000);
+        if (!body || body.trim().length < 20) {
+            body = Array.from(document.querySelectorAll('*'))
+                .map(function(el) { return el.textContent || ''; })
+                .join(' ')
+                .replace(/\\s+/g, ' ').trim();
+        }
+        // Also check Next.js / React global state for reset info
+        var nextData = '';
+        try {
+            var nd = window.__NEXT_DATA__;
+            if (nd) nextData = JSON.stringify(nd).substring(0, 2000);
+        } catch(e) {}
+        r.rawText = (body.substring(0, 2000) + ' ' + nextData).trim();
 
         // Plan
         var plans = [[/claude\\s+max|\\bmax\\s+plan/i,'Max'],[/claude\\s+pro|\\bpro\\s+plan/i,'Pro'],
@@ -220,7 +233,7 @@ class WebScrapingService: NSObject, ObservableObject {
     // MARK: - DOM extraction (fallback)
 
     private func runDOMExtraction() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { [weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) { [weak self] in
             self?.scrapeWebView.evaluateJavaScript(kDOMExtractionJS) { result, _ in
                 guard let self,
                       let s = result as? String,
@@ -239,14 +252,22 @@ class WebScrapingService: NSObject, ObservableObject {
 
     /// Called from the fetch/XHR interceptor via message handler.
     private func applyAPIResult(_ json: [String: Any]) {
-        // Try to find session/window usage in the API response.
-        // Claude.ai's internal API may return different shapes; we probe common keys.
+
+        // ── 1. Extract reset date from anywhere in the JSON (independently of usage counts)
+        if let rd = findResetDate(in: json) {
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                if self.usageData?.resetDate == nil {
+                    self.usageData?.resetDate = rd
+                }
+            }
+        }
+
+        // ── 2. Try to find session/window usage counts
         let candidates: [(used: Any?, limit: Any?, reset: Any?)] = [
-            // Top-level flat
             (json["messages_used"],   json["messages_limit"],   json["reset_at"]),
             (json["usage_count"],     json["usage_limit"],      json["resets_at"]),
             (json["count"],           json["limit"],            json["reset_time"]),
-            (json["remaining"].map { _ in nil } ?? nil, json["remaining"], nil),
         ]
 
         // Also look one level deep
@@ -254,7 +275,6 @@ class WebScrapingService: NSObject, ObservableObject {
         for (_, v) in json {
             if let sub = v as? [String: Any] {
                 nested.merge(sub) { a, _ in a }
-                // Also check array-of-objects (pick first element)
                 if let arr = v as? [[String: Any]], let first = arr.first {
                     nested.merge(first) { a, _ in a }
                 }
@@ -262,11 +282,13 @@ class WebScrapingService: NSObject, ObservableObject {
         }
         let nestedCandidates: [(used: Any?, limit: Any?, reset: Any?)] = [
             (nested["messages_used"],  nested["messages_limit"],  nested["reset_at"]),
+            (nested["messages_used"],  nested["messages_limit"],  nested["resets_at"]),
             (nested["used"],           nested["limit"],           nested["reset_at"]),
+            (nested["used"],           nested["limit"],           nested["resets_at"]),
             (nested["count"],          nested["limit"],           nested["reset_time"]),
         ]
 
-        for c in (candidates + nestedCandidates) {
+for c in (candidates + nestedCandidates) {
             let used  = intValue(c.used)
             let limit = intValue(c.limit)
             guard let u = used, let l = limit, l > 0, u <= l else { continue }
@@ -301,10 +323,13 @@ class WebScrapingService: NSObject, ObservableObject {
         let messagesLimit   = j["messagesLimit"]   as? Int    ?? 0
         let sessionUsed     = j["sessionUsed"]     as? Int    ?? 0
         let sessionLimit    = j["sessionLimit"]    as? Int    ?? 0
-        let rateLimitStatus = j["rateLimitStatus"] as? String ?? "Normal"
-        let resetDateStr    = j["resetDateStr"]    as? String ?? ""
+        let rateLimitStatus  = j["rateLimitStatus"]  as? String ?? "Normal"
+        let resetDateStr     = j["resetDateStr"]     as? String ?? ""
+        let sessionResetStr  = j["sessionResetStr"]  as? String ?? ""
 
         var resetDate: Date?
+
+        // 1. Try absolute date string: "resets on December 25"
         if !resetDateStr.isEmpty {
             let fmts = ["MMMM d, yyyy", "MMMM d", "MMM d, yyyy", "MMM d"]
             let df = DateFormatter(); df.locale = Locale(identifier: "en_US_POSIX")
@@ -319,6 +344,13 @@ class WebScrapingService: NSObject, ObservableObject {
                 }
             }
         }
+
+        // 2. Try relative duration string: "2 hours", "30 minutes", "1 day", "2h 30m"
+        if resetDate == nil, !sessionResetStr.isEmpty {
+            resetDate = parseRelativeDuration(sessionResetStr)
+        }
+
+        let rawText = j["rawText"] as? String ?? ""
 
         var data = usageData ?? UsageData(
             planType: planType, messagesUsed: messagesUsed, messagesLimit: messagesLimit,
@@ -351,6 +383,55 @@ class WebScrapingService: NSObject, ObservableObject {
         if let d = v as? Double { return Int(d) }
         if let s = v as? String { return Int(s) }
         return nil
+    }
+
+    /// Recursively searches a JSON dict for any reset date field and returns the nearest future one.
+    private func findResetDate(in json: [String: Any]) -> Date? {
+        let resetKeys = ["reset_at", "resets_at", "reset_time"]
+        var found: [Date] = []
+
+        func search(_ dict: [String: Any], depth: Int) {
+            guard depth < 4 else { return }
+            for (key, val) in dict {
+                if resetKeys.contains(key), let d = parseResetDate(val) { found.append(d) }
+                if let sub = val as? [String: Any] { search(sub, depth: depth + 1) }
+                if let arr = val as? [[String: Any]] { arr.forEach { search($0, depth: depth + 1) } }
+            }
+        }
+        search(json, depth: 0)
+
+        let now = Date()
+        return found.filter { $0 > now }.min()
+    }
+
+    /// Parses strings like "2 hours", "30 minutes", "1 day", "2h 30m", "45 mins"
+    /// into an absolute Date offset from now.
+    private func parseRelativeDuration(_ s: String) -> Date? {
+        var totalSeconds: Double = 0
+        let lower = s.lowercased()
+
+        // Match patterns like "2 hours", "30 minutes", "1 day", "45 mins", "2h", "30m"
+        let pattern = #"(\d+)\s*(day|hour|hr|min|h|d|m)s?"#
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else { return nil }
+        let matches = regex.matches(in: lower, range: NSRange(lower.startIndex..., in: lower))
+        guard !matches.isEmpty else { return nil }
+
+        for match in matches {
+            guard let valueRange = Range(match.range(at: 1), in: lower),
+                  let unitRange  = Range(match.range(at: 2), in: lower),
+                  let value = Double(lower[valueRange])
+            else { continue }
+            let unit = String(lower[unitRange])
+            switch unit {
+            case "d", "day":          totalSeconds += value * 86400
+            case "h", "hr", "hour":  totalSeconds += value * 3600
+            case "m", "min":         totalSeconds += value * 60
+            default: break
+            }
+        }
+
+        guard totalSeconds > 0 else { return nil }
+        return Date().addingTimeInterval(totalSeconds)
     }
 
     private func parseResetDate(_ v: Any?) -> Date? {

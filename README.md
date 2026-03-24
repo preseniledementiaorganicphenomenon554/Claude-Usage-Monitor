@@ -21,6 +21,7 @@ A native macOS menu-bar app that tracks your [Claude.ai](https://claude.ai) usag
 - **Session-aware** — captures Claude's internal rate-limit window via a fetch interceptor, not just the billing-period total
 - **Configurable auto-refresh** — 30s / 1m / 2m / 5m / 10m, set via right-click menu
 - **Native notifications** — alerts at 80%, 90%, 100% usage and on session reset
+- **Live reset countdown** — "Resets in Xh Ym" updates every minute while the popover is open; reset time sourced directly from Claude's API
 - **Stale data indicator** — icon turns grey and shows ⚠ if data is older than 10 minutes
 - **Right-click context menu** — quick usage info and settings without opening the popover
 - **In-app update banner** — notified when a new version is available on GitHub
@@ -143,7 +144,7 @@ open ClaudeUsageMonitor.xcodeproj
 
 The app embeds a hidden `WKWebView` that loads `claude.ai/settings/usage` using your stored browser session (via `WKWebsiteDataStore.default()` — the same cookie store Safari uses for WebKit-based apps).
 
-A JavaScript **fetch/XHR interceptor** is injected at document start, before any page script runs. It captures every API response that mentions usage, limits, or quotas and forwards the raw JSON to Swift. This gives session-window data (e.g. the 5-hour rate-limit window) not visible in the page's DOM text. A DOM-text extraction pass runs 2.5 s after page load as a fallback.
+A JavaScript **fetch/XHR interceptor** is injected at document start, before any page script runs. It captures every API response that mentions usage, limits, or quotas and forwards the raw JSON to Swift. This gives session-window data (e.g. the 5-hour rate-limit window) not visible in the page's DOM text. A DOM-text extraction pass runs 5 s after page load as a fallback.
 
 ### Cookie persistence
 
