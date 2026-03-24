@@ -2,7 +2,9 @@ name: Update Homebrew Tap
 
 # Runs automatically after the "Build & Release" workflow finishes
 on:
-  workflow_dispatch:  # manual only — requires TAP_GITHUB_TOKEN secret to be set first
+  workflow_run:
+    workflows: ["Build & Release"]
+    types: [completed]
 
 jobs:
   update-tap:
